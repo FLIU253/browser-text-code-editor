@@ -3,6 +3,9 @@ import { useRef } from 'react';
 import prettier from 'prettier';
 import parser from 'prettier/parser-babel';
 import './code-editor.css';
+import './syntax.css';
+import codeShift from 'jscodeshift';
+import Highlighter from 'monaco-jsx-highlighter';
 
 interface CodeEditorProps {
     initialValue: string;
@@ -20,6 +23,20 @@ const CodeEditor: React.FC<CodeEditorProps> = ({initialValue, onChange}) => {
         });
 
         monacoEditor.getModel()?.updateOptions({tabSize: 3});
+
+        const highlighter = new Highlighter(
+            //@ts-ignore
+            window.monaco,
+            codeShift,
+            monacoEditor
+        );
+
+        highlighter.highLightOnDidChangeModelContent(
+            () => {},
+            () => {},
+            undefined,
+            () => {}
+        );
     };
 
     const onFormatClick = () => {
