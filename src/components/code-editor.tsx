@@ -1,4 +1,8 @@
-import MonacoEditor from '@monaco-editor/react';
+import MonacoEditor, {EditorDidMount} from '@monaco-editor/react';
+import { useRef } from 'react';
+import prettier from 'prettier';
+import parser from 'prettier/parser-babel';
+import './code-editor.css';
 
 interface CodeEditorProps {
     initialValue: string;
@@ -7,19 +11,40 @@ interface CodeEditorProps {
 
 const CodeEditor: React.FC<CodeEditorProps> = ({initialValue, onChange}) => {
 
-    const onEditorDidMount = (getValue: () => string, monacoEditor: any) => {
+    const editorRef = useRef<any>();
+
+    const onEditorDidMount: EditorDidMount = (getValue, monacoEditor) => {
+        editorRef.current = monacoEditor;
         monacoEditor.onDidChangeModelContent(() => {
             onChange(getValue());
         });
+
+        monacoEditor.getModel()?.updateOptions({tabSize: 3});
     };
 
-    return <MonacoEditor 
-    editorDidMount = {onEditorDidMount}
-    value = {initialValue}
-    height="500px" 
-    language="javascript" 
-    theme="dark"
-    options={{
+    const onFormatClick = () => {
+        //get current value from editor, format that value, set the formatted value back in the editor
+        const unformatted = editorRef.current.getModel().getValue();
+        const formatted = prettier.format(unformatted, {
+            parser: 'babel',
+            plugins: [parser],
+            useTabs: false,
+            semi: true,
+            singleQuote: true
+        }).replace(/\n$/, '');
+
+        editorRef.current.setValue(formatted);
+    }
+
+    return <div className="editor-wrapper">
+        <button onClick = {onFormatClick} className="button button-format is-primary is-small">Format</button>
+        <MonacoEditor 
+        editorDidMount = {onEditorDidMount}
+        value = {initialValue}
+        height="500px" 
+        language="javascript" 
+        theme="dark"
+        options={{
         wordWrap: 'on',
         minimap: {enabled: false},
         showUnused: false,
@@ -28,7 +53,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({initialValue, onChange}) => {
         fontSize: 16,
         scrollBeyondLastLine: false,
         automaticLayout: true
-    }}/>;
+        }}/>
+    </div>;
 };
 
 export default CodeEditor;
