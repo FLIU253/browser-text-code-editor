@@ -1,5 +1,10 @@
 import * as esbuild from 'esbuild-wasm';
 import axios from 'axios';
+import localForage from 'localforage';
+
+const fileCache = localForage.createInstance({
+  name: 'filecache'
+});
 
 export const unpkgPathPlugin = () => {
   return {
@@ -9,12 +14,20 @@ export const unpkgPathPlugin = () => {
         console.log('onResolve', args);
         if (args.path === 'index.js') {
           return { path: args.path, namespace: 'a' };
-        } else if (args.path === 'tiny-test-pkg') {
+        }
+
+        if (args.path.includes('./') || args.path.includes('../')) {
           return {
-            path: 'https://unpkg.com/tiny-test-pkg@1.0.0/index.js',
             namespace: 'a',
+            path: new URL(args.path, 'https://unpkg.com' + args.resolveDir + "/").href,
           };
         }
+
+        return {
+          namespace: 'a',
+          path: `https://unpkg.com/${args.path}`,
+        };
+
       });
 
       build.onLoad({ filter: /.*/ }, async (args: any) => {
@@ -24,17 +37,32 @@ export const unpkgPathPlugin = () => {
           return {
             loader: 'jsx',
             contents: `
-              const message = require('tiny-test-pkg');
-              console.log(message);
+              import React, {useState} from 'react';
+              console.log(React, useState);
             `,
           };
         }
 
-        const { data } = await axios.get(args.path);
-        return {
+        //Check to see if we have already fetched this file
+        // and if it is in the cache
+        //if it is return it, otherwise store response in cache
+        const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(args.path);
+
+        if(cachedResult) {
+          return cachedResult;
+        }
+
+        const { data, request } = await axios.get(args.path);
+        const result: esbuild.OnLoadResult = {
           loader: 'jsx',
           contents: data,
+          resolveDir: new URL('./', request.responseURL).pathname
         };
+
+        await fileCache.setItem(args.path, result);
+
+        return result;
+
       });
     },
   };
