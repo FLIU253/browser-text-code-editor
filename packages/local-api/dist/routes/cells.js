@@ -60,11 +60,9 @@ var createCellsRouter = function (filename, dir) {
                     return [3 /*break*/, 6];
                 case 2:
                     err_1 = _a.sent();
-                    if (!(err_1.code === "ENOENT")) return [3 /*break*/, 4];
-                    //Add code to create a file and add default cells
+                    if (!(err_1.code === 'ENOENT')) return [3 /*break*/, 4];
                     return [4 /*yield*/, promises_1.default.writeFile(fullPath, '[]', 'utf-8')];
                 case 3:
-                    //Add code to create a file and add default cells
                     _a.sent();
                     res.send([]);
                     return [3 /*break*/, 5];
@@ -80,8 +78,10 @@ var createCellsRouter = function (filename, dir) {
             switch (_a.label) {
                 case 0:
                     cells = req.body.cells;
+                    // Write the cells into the file
                     return [4 /*yield*/, promises_1.default.writeFile(fullPath, JSON.stringify(cells), 'utf-8')];
                 case 1:
+                    // Write the cells into the file
                     _a.sent();
                     res.send({ status: 'ok' });
                     return [2 /*return*/];

@@ -43,11 +43,11 @@ exports.serveCommand = void 0;
 var path_1 = __importDefault(require("path"));
 var commander_1 = require("commander");
 var local_api_1 = require("local-api");
-var isProduction = process.env.NODE_ENV === "production";
+var isProduction = process.env.NODE_ENV === 'production';
 exports.serveCommand = new commander_1.Command()
     .command('serve [filename]')
     .description('Open a file for editing')
-    .option('-p --port <number>', 'port to run server on', '4005')
+    .option('-p, --port <number>', 'port to run server on', '4005')
     .action(function (filename, options) {
     if (filename === void 0) { filename = 'notebook.js'; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -56,19 +56,19 @@ exports.serveCommand = new commander_1.Command()
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    dir = (path_1.default.join(process.cwd(), path_1.default.dirname(filename)));
+                    dir = path_1.default.join(process.cwd(), path_1.default.dirname(filename));
                     return [4 /*yield*/, local_api_1.serve(parseInt(options.port), path_1.default.basename(filename), dir, !isProduction)];
                 case 1:
                     _a.sent();
-                    console.log("Opened " + filename + ". Navigate to http://localhost:" + options.port + " to edit the file");
+                    console.log("Opened " + filename + ". Navigate to http://localhost:" + options.port + " to edit the file.");
                     return [3 /*break*/, 3];
                 case 2:
                     err_1 = _a.sent();
-                    if (err_1.code === "EADDRINUSE") {
-                        console.error("Port is in use. Try running on a different port.");
+                    if (err_1.code === 'EADDRINUSE') {
+                        console.error('Port is in use. Try running on a different port.');
                     }
                     else {
-                        console.log("Heres the problem", err_1.message);
+                        console.log('Heres the problem', err_1.message);
                     }
                     process.exit(1);
                     return [3 /*break*/, 3];

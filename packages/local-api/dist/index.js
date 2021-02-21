@@ -9,22 +9,19 @@ var http_proxy_middleware_1 = require("http-proxy-middleware");
 var path_1 = __importDefault(require("path"));
 var cells_1 = require("./routes/cells");
 var serve = function (port, filename, dir, useProxy) {
-    //     console.log('serving traffic on port', port);
-    //     console.log('saving/fetching cells from', filename);
-    //     console.log('that file is in dir', dir);
     var app = express_1.default();
+    app.use(cells_1.createCellsRouter(filename, dir));
     if (useProxy) {
         app.use(http_proxy_middleware_1.createProxyMiddleware({
             target: 'http://localhost:3000',
             ws: true,
-            logLevel: 'silent'
+            logLevel: 'silent',
         }));
     }
     else {
         var packagePath = require.resolve('local-client/build/index.html');
         app.use(express_1.default.static(path_1.default.dirname(packagePath)));
     }
-    app.use(cells_1.createCellsRouter(filename, dir));
     return new Promise(function (resolve, reject) {
         app.listen(port, resolve).on('error', reject);
     });
