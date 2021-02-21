@@ -1,5 +1,6 @@
 {
   "name": "root",
+  "description": "a browser editor",
   "private": true,
   "devDependencies": {
     "lerna": "^3.22.1"
